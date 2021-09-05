@@ -22,10 +22,6 @@ module.exports = NodeHelper.create({
         this.previousFetchOk = false;
     },
 
-    end: function() {
-        console.log("Ending: " + this.name);
-    },
-
     socketNotificationReceived: async function(notification, payload) {
         if (notification == "SET_CONFIG") {
             this.config = payload;
