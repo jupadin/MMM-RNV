@@ -70,3 +70,8 @@ The remaining data and credentials, provided by the RNV, is not needed.
 | `numJourneys` | `string` | `"10"` | Number of shown departures. |
 | `updateInterval` | `string` | `"60000"` | How often the table shall be updated [milliseconds] (1 minute) |
 | `animationSpeed` | `string` | `"2000"`| Animation speed to fade in the module on startup [milliseconds] (2 seconds) |
+| `coloredLines` | `boolean` | `true` | Display colored line numbers |
+| `showLineIcons` | `boolean` | `true` | Show icons next to line numbers |
+| `useColorForRealTimeInfo` | `boolean` | `true` | Display real time information colored |
+| `showTableHeader` | `boolean` | `true` | Show table header |
+| `showTableHeaderAsSymbols` | `boolean` | `false` | Show icons instead of header titles |

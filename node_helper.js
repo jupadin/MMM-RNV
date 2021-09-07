@@ -15,6 +15,8 @@ const { setContext } = require('apollo-link-context');
 const gql = require('graphql-tag');
 const fetch = require('node-fetch');
 
+const request = require('request');
+
 module.exports = NodeHelper.create({
     start: function() {
         this.config = null;
@@ -37,11 +39,32 @@ module.exports = NodeHelper.create({
             // Authenticate by OAuth
             this.client = this.authenticate(this.config.apiKey);
         }
+
+        // Retrieve color data from RNV-Server
+        this.getColor();
+
         // Retrieve data from RNV-Server
         this.getData();
     },
 
+
+    getColor: function() {
+        console.log(this.name + ": Fetching color data from RNV-Server...");
+        const self = this;
+        const colorUrl = "https://rnvopendataportalpublic.blob.core.windows.net/public/openDataPortal/liniengruppen-farben.json";
+        request(colorUrl, (error, response, body) => {
+            if (error || response.statusCode !== 200) {
+                console.log("Could not fetch color data from RNV-Server (" + response.statusCode + ").");
+                return {};
+            }
+            const result = JSON.parse(body).lineGroups;
+
+            self.sendSocketNotification("COLOR", result);
+        });
+    },
+
     getData: function() {
+        console.log(this.name + ": Fetching line data from RNV-Server...");
         const now = new Date().toISOString();
         const numJourneys = this.config.numJourneys;
         const stationID = this.config.stationID;

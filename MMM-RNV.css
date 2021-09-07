@@ -5,56 +5,68 @@
  * MIT Licensed.
  */
 
-.MMM-RNV .departure {
+/* .MMM-RNV.header.departure {
     text-align: left;
-}
+} */
 
-.MMM-RNV .line {
+.MMM-RNV.header.line {
     text-align: center;
 }
 
-.MMM-RNV .direction {
+.MMM-RNV.header.direction {
     text-align: center;
 }
 
-.MMM-RNV .platform {
+.MMM-RNV.header.platform {
     text-align: right;
 }
 
-.MMM-RNV .time {
-    text-align: right;
-    padding-left: 5px;
-    padding-right: 10px;
-}
-
-.MMM-RNV .delay {
+.MMM-RNV.header.delay {
     padding-left: 10px;
     text-align: left;
 }
 
-.MMM-RNV .line {
-    text-align: right;
+.MMM-RNV.data.departure {
+    text-align: left;
 }
 
-.MMM-RNV .icon {
-    text-align: center;
+.MMM-RNV.data.delay {
+    padding-left: 10px;
     padding-right: 10px;
-    padding-left: 5px;
 }
 
-.MMM-RNV .direction {
+.MMM-RNV.data.line {
+    width: 20px;
+    height: 20px;
+    padding: 1px;
+}
+
+.MMM-RNV.data.line.content {
+    text-align: center;
+    font-size: 16px;
+    padding: 2px;
+    color: #FFFFFF;
+    background-clip: padding-box;
+}
+
+.MMM-RNV.data.icon {
+    padding-right: 10px;
+    padding-left: 10px;
+}
+
+.MMM-RNV.data.direction {
     width: 50%;
     text-align: center;
 }
 
-.MMM-RNV .platform {
-    text-align: center;
+.MMM-RNV.data.platform {
+    text-align: right;
 }
 
-.MMM-RNV .early {
+/* .MMM-RNV.early {
     color: #00FF00;
 }
 
-.MMM-RNV .late {
+.MMM-RNV.late {
     color: #FF0000;
-}
+} */
