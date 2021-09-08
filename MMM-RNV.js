@@ -18,6 +18,7 @@ Module.register("MMM-RNV",{
         useColorForRealTimeInfo: true,
         showTableHeader: true,
         showTableHeaderAsSymbols: false,
+        focus_on: [5],
         apiKey: "",
         clientID: "",
         resourceID: "",
@@ -67,7 +68,11 @@ Module.register("MMM-RNV",{
     
     // Define header.
     getHeader: function() {
-        return this.config.header;
+        if (!this.loaded) {
+            return this.config.header;
+        } else {
+            return this.config.header + " - " + this.stationName;
+        }
     },
     
     // Override dom generator.
@@ -268,6 +273,14 @@ Module.register("MMM-RNV",{
             dataCellPlatform.className = "MMM-RNV data platform";
             dataCellPlatform.innerHTML = platform;
             dataRow.appendChild(dataCellPlatform);
+
+            if (Array.isArray(this.config.focus_on)) {
+                this.config.focus_on.forEach(element => {
+                    if (element == line) {
+                        dataRow.classList.add("bright");
+                    }
+                });
+            }
             
             // Append data row to table.
             table.appendChild(dataRow);
@@ -280,13 +293,14 @@ Module.register("MMM-RNV",{
     
     // Override socket notification handler.
     socketNotificationReceived: function(notification, payload) {
-        console.log(notification);
         if (notification === "DATA") {
             var animationSpeed = this.config.animationSpeed;
             if (this.loaded) {
                 animationSpeed = 0;
             }
             this.fetchedData = payload;
+            // Set station name of current fetch
+            this.stationName = payload.data.station.longName;
             this.loaded = true;
             // Update dom with given animation speed
             this.updateDom(animationSpeed);
