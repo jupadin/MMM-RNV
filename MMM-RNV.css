@@ -50,6 +50,7 @@
 }
 
 .MMM-RNV.data.icon {
+    text-align: center;
     padding-right: 10px;
     padding-left: 10px;
 }
@@ -62,11 +63,3 @@
 .MMM-RNV.data.platform {
     text-align: right;
 }
-
-/* .MMM-RNV.early {
-    color: #00FF00;
-}
-
-.MMM-RNV.late {
-    color: #FF0000;
-} */
