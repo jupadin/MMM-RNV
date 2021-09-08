@@ -17,6 +17,8 @@ const fetch = require('node-fetch');
 
 const request = require('request');
 
+const Log = require('../../js/logger.js')
+
 module.exports = NodeHelper.create({
     start: function() {
         this.config = null;
@@ -49,13 +51,13 @@ module.exports = NodeHelper.create({
 
 
     getColor: function() {
-        console.log(this.name + ": Fetching color data from RNV-Server...");
+        Log.info(this.name + ": Fetching color from RNV-Server...");
         const self = this;
         const colorUrl = "https://rnvopendataportalpublic.blob.core.windows.net/public/openDataPortal/liniengruppen-farben.json";
         request(colorUrl, (error, response, body) => {
             if (error || response.statusCode !== 200) {
-                console.log(this.name + ": Could not fetch color data from RNV-Server (" + response.statusCode + ").");
-                console.log(this.name + ": Retring to fetch color data in 30s.");
+                Log.debug(this.name + ": Could not fetch color data from RNV-Server (" + response.statusCode + ").");
+                Log.debug(this.name + ": Retring to fetch color data in 30s.");
                 setTimeout(this.getColor.bind(this), 30 * 1000);
                 return {};
             }
@@ -65,7 +67,7 @@ module.exports = NodeHelper.create({
     },
 
     getData: function() {
-        console.log(this.name + ": Fetching line data from RNV-Server...");
+        Log.info(this.name + ": Fetching data from RNV-Server...");
         const now = new Date().toISOString();
         const numJourneys = this.config.numJourneys;
         const stationID = this.config.stationID;
@@ -185,6 +187,7 @@ module.exports = NodeHelper.create({
                     this.getData();
                 });
             } else {
+                Log.debug(error);
                 // Create error return value
                 const errValue = 1;
                 // And send socket notification back to front-end to display the / an error...
@@ -202,7 +205,7 @@ module.exports = NodeHelper.create({
         });
         
         if (!response.ok) {
-            console.error("Error while creating access token.", response.error);
+            Log.debug("Error while creating access token.", response.error);
             return null;
         }
         const json = await response.json();
