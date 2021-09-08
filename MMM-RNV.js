@@ -18,7 +18,7 @@ Module.register("MMM-RNV",{
         useColorForRealTimeInfo: true,
         showTableHeader: true,
         showTableHeaderAsSymbols: false,
-        focus_on: [5],
+        focus_on: [],
         apiKey: "",
         clientID: "",
         resourceID: "",
