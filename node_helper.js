@@ -54,11 +54,12 @@ module.exports = NodeHelper.create({
         const colorUrl = "https://rnvopendataportalpublic.blob.core.windows.net/public/openDataPortal/liniengruppen-farben.json";
         request(colorUrl, (error, response, body) => {
             if (error || response.statusCode !== 200) {
-                console.log("Could not fetch color data from RNV-Server (" + response.statusCode + ").");
+                console.log(this.name + ": Could not fetch color data from RNV-Server (" + response.statusCode + ").");
+                console.log(this.name + ": Retring to fetch color data in 30s.");
+                setTimeout(this.getColor.bind(this), 30 * 1000);
                 return {};
             }
             const result = JSON.parse(body).lineGroups;
-
             self.sendSocketNotification("COLOR", result);
         });
     },
