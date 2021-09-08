@@ -75,3 +75,4 @@ The remaining data and credentials, provided by the RNV, is not needed.
 | `useColorForRealTimeInfo` | `boolean` | `true` | Display real time information colored |
 | `showTableHeader` | `boolean` | `true` | Show table header |
 | `showTableHeaderAsSymbols` | `boolean` | `false` | Show icons instead of header titles |
+| `focus_on` | `array` | `[]` | Array of integers, to highlight specific line numbers |
