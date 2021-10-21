@@ -36,6 +36,7 @@ Module.register("MMM-RNV",{
     start: function() {
         Log.info("Starting module: " + this.name); 
         this.loaded = false;
+        this.error = null;
         this.credentials = false;
         this.stationName = "";
         this.fetchedData = null;
@@ -92,7 +93,7 @@ Module.register("MMM-RNV",{
             return wrapper;
         }
         if (!this.loaded) {
-            wrapper.innerHTML = "Loading...";
+            wrapper.innerHTML = this.translate("LOADING");
             wrapper.className = "light small dimmed";
             return wrapper;
         }
@@ -109,7 +110,6 @@ Module.register("MMM-RNV",{
         table.id = "RNVTable";
 
         if (this.config.showTableHeader) {
-        
             const tableHead = document.createElement("tr");
 
             const tableHeadTime = document.createElement("th");
@@ -172,7 +172,6 @@ Module.register("MMM-RNV",{
 
             hruleRow.appendChild(hruleData);
             table.appendChild(hruleRow);
-
         }
 
         const numDepartures = this.fetchedData.data.station.journeys.elements.length;
@@ -239,8 +238,6 @@ Module.register("MMM-RNV",{
                     } else {
                         dataCellLineContent.style.backgroundColor = "grey";
                     }
-                } else {
-                    console.log("No colordata available.");
                 }
             }
 
@@ -296,7 +293,7 @@ Module.register("MMM-RNV",{
     // Override socket notification handler.
     socketNotificationReceived: function(notification, payload) {
         if (notification === "DATA") {
-            var animationSpeed = this.config.animationSpeed;
+            let animationSpeed = this.config.animationSpeed;
             if (this.loaded) {
                 animationSpeed = 0;
             }
@@ -304,14 +301,18 @@ Module.register("MMM-RNV",{
             // Set station name of current fetch
             this.stationName = payload.data.station.longName;
             this.loaded = true;
-            // Update dom with given animation speed
+            // Update dom with given animation speed.
             this.updateDom(animationSpeed);
         } else if (notification === "COLOR") {
             this.fetchedColor = payload;
+            // Use default animation speed to update dom with color data such that there is no conflict while updating the dom with new data.
+            this.updateDom(this.config.animationSpeed);
         } else if (notification === "ERROR") {
             // TODO: Update front-end to display specific error.
+            this.error = true;
+            this.fetchedData = payload;
         } else {
-            console.log(this.name + ": Unhandled message received.");
+            Log.warn(this.name + ": Unhandled message received.");
         }
     }
 });

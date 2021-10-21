@@ -1,4 +1,6 @@
 {
+    "LOADING": "Loading...",
+    "ERROR": "Error...",
     "DEPARTURE": "Departure",
     "LINE": "Line",
     "DIRECTION": "Direction",

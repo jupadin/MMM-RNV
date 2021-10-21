@@ -1,4 +1,6 @@
 {
+    "LOADING": "Lade...",
+    "ERROR": "Fehler...",
     "DEPARTURE": "Abfahrt",
     "LINE": "Linie",
     "DIRECTION": "Richtung",

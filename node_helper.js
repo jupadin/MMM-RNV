@@ -24,11 +24,16 @@ module.exports = NodeHelper.create({
         this.config = null;
         this.client = null;
         this.previousFetchOk = false;
+        this.colorTimer = null;
+        this.dataTimer = null;
     },
 
     socketNotificationReceived: async function(notification, payload) {
         if (notification == "SET_CONFIG") {
             this.config = payload;
+
+            clearTimeout(this.colorTimer);
+            clearTimeout(this.dataTimer);
 
             if (!this.config.apiKey) {
                 const clientID = this.config.clientID;
@@ -51,15 +56,15 @@ module.exports = NodeHelper.create({
 
 
     getColor: function() {
-        Log.info(this.name + ": Fetching color from RNV-Server...");
         const self = this;
+        Log.info(this.name + ": Fetching color from RNV-Server...");
         const colorUrl = "https://rnvopendataportalpublic.blob.core.windows.net/public/openDataPortal/liniengruppen-farben.json";
         request(colorUrl, (error, response, body) => {
             if (error || response.statusCode !== 200) {
-                Log.debug(this.name + ": Could not fetch color data from RNV-Server (" + response.statusCode + ").");
-                Log.debug(this.name + ": Retring to fetch color data in 30s.");
-                setTimeout(this.getColor.bind(this), 30 * 1000);
-                return {};
+                Log.debug(self.name + ": Could not fetch color data from RNV-Server (" + response.statusCode + ").");
+                Log.debug(self.name + ": Retring to fetch color data in 30s.");
+                self.colorTimer = setTimeout(self.getColor.bind(self), 30 * 1000);
+                return;
             }
             const result = JSON.parse(body).lineGroups;
             self.sendSocketNotification("COLOR", result);
@@ -161,7 +166,7 @@ module.exports = NodeHelper.create({
             this.sendSocketNotification("DATA", fetchedData);
 
             // Set timeout to continuously fetch new data from RNV-Server
-            setTimeout(this.getData.bind(this), (this.config.updateInterval));
+            this.dataTimer = setTimeout(this.getData.bind(this), (this.config.updateInterval));
 
         }).catch((error) => {
             // If there is "only" a apiKey given in the configuration,
