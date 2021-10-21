@@ -1,7 +1,7 @@
 /* Magic Mirror
  * Module: MMM-RNV
  *
- * By Julian Dinter
+ * By jupadin
  * MIT Licensed.
  */
 
@@ -62,7 +62,9 @@ Module.register("MMM-RNV",{
     // Define required translations.
     getTranslations: function() {
         return {
-            de: "translations/de.json"
+            de: "translations/de.json",
+            en: "translations/en.json",
+            fr: "translations/fr.json"
         }
     },
     

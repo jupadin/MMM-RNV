@@ -1,7 +1,7 @@
 /* Magic Mirror
  * Module: MMM-RNV
  *
- * By Julian Dinter
+ * By jupadin
  * MIT Licensed.
  */
 

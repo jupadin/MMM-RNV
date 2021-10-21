@@ -1,13 +1,9 @@
 /* Magic Mirror
  * Module: MMM-RNV
  *
- * By Julian Dinter
+ * By jupadin
  * MIT Licensed.
  */
-
-/* .MMM-RNV.header.departure {
-    text-align: left;
-} */
 
 .MMM-RNV.header.line {
     text-align: center;
