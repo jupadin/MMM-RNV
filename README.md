@@ -71,7 +71,7 @@ The remaining data and credentials, provided by the RNV, is not needed.
 | `animationSpeed` | `string` | `"2000"`| Animation speed to fade in the module on startup [milliseconds] (2 seconds) |
 | `coloredLines` | `boolean` | `true` | Display colored line numbers |
 | `showLineIcons` | `boolean` | `true` | Show icons next to line numbers |
-| `useColorForRealTimeInfo` | `boolean` | `true` | Display real time information colored |
+| `useColorForRealTimeInfo` | `boolean` | `true` | Display colored real time information |
 | `showTableHeader` | `boolean` | `true` | Show table header |
 | `showTableHeaderAsSymbols` | `boolean` | `false` | Show icons instead of header titles |
 | `focus_on` | `array` | `[]` | Array of integers, to highlight specific line numbers |
