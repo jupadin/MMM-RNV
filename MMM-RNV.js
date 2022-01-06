@@ -305,8 +305,11 @@ Module.register("MMM-RNV",{
             this.updateDom(animationSpeed);
         } else if (notification === "COLOR") {
             this.fetchedColor = payload;
-            // Use default animation speed to update dom with color data such that there is no conflict while updating the dom with new data.
-            this.updateDom(this.config.animationSpeed);
+            // If there is already data available, update dom with fetched color data.
+            if (this.config.fetchedData != null) {
+                // Use default animation speed to update dom with color data
+                this.updateDom(this.config.animationSpeed);
+            }
         } else if (notification === "ERROR") {
             // TODO: Update front-end to display specific error.
             this.error = true;
