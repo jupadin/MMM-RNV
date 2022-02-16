@@ -29,9 +29,9 @@ The table below lists all possible configuration options.
     modules: [
         {
             module: 'MMM-RNV',
-            header: 'RNV Abfahrstmonitor',
             position: 'top_right',
             config: {
+                header: 'RNV Abfahrstmonitor',
                 apiKey: 'Enter your apiKey here',
                 // or
                 clientID: 'Enter your @clientID here',
