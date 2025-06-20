@@ -6,12 +6,11 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-    "keywords": [
-      "MagicMirror",
-      "Public Transport",
-      "RNV"
+  "keywords": [
+    "MagicMirror",
+    "Public Transport",
+    "RNV"
   ],
-  "author": "Julian Dinter",
   "license": "ISC",
   "dependencies": {
     "apollo-cache-inmemory": "^1.6.6",
@@ -19,8 +18,6 @@
     "apollo-link-context": "^1.0.20",
     "apollo-link-http": "^1.5.17",
     "graphql": "^15.4.0",
-    "graphql-tag": "^2.11.0",
-    "node-fetch": "^2.6.1",
-    "request": "^2.88.2"
+    "graphql-tag": "^2.11.0"
   }
 }
