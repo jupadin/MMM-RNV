@@ -8,7 +8,7 @@
 Module.register("MMM-RNV",{
    // Default module config.
    defaults: {
-        header: "RNV Abfahrtsmonitor",
+        header: "MMM-RNV",
         animationSpeed: 2 * 1000, // 2 seconds
         updateInterval: 1 * 60 * 1000, // every 1 minute
         stationID: "2417",
@@ -25,7 +25,7 @@ Module.register("MMM-RNV",{
         clientSecret: "",
         oAuthURL: "",
         tenantID: "",
-        clientAPIURL: "https://graphql-sandbox-dds.rnv-online.de",
+        clientAPIURL: "",
         icon: {
             "STRASSENBAHN" : "fas fa-train",
             "STADTBUS" : "fas fa-bus"
@@ -284,6 +284,22 @@ Module.register("MMM-RNV",{
             // Append data row to table.
             table.appendChild(dataRow);
         }
+
+
+        // Create footer row with last update time.
+        const footerRow = document.createElement("tr");
+        footerRow.className = "footerRow";
+
+        const footer = document.createElement("td");
+        footer.className = "footer";
+        footer.setAttribute("colspan", 8);
+        footer.innerHTML = this.translate("UPDATED") + ": " + moment().format("dd, DD.MM.YYYY, HH:mm[h]");
+        footerRow.appendChild(footer);
+
+        table.appendChild(footerRow);
+
+
+        
         wrapper.appendChild(table);
 
         // Return the wrapper to the dom.
@@ -305,11 +321,11 @@ Module.register("MMM-RNV",{
             this.updateDom(animationSpeed);
         } else if (notification === "COLOR") {
             this.fetchedColor = payload;
-            // If there is already data available, update dom with fetched color data.
-            if (this.config.fetchedData != null) {
-                // Use default animation speed to update dom with color data
-                this.updateDom(this.config.animationSpeed);
-            }
+            // // If there is already data available, update dom with fetched color data.
+            // if (this.config.fetchedData != null) {
+            //     // Use default animation speed to update dom with color data
+            this.updateDom(this.config.animationSpeed);
+            // }
         } else if (notification === "ERROR") {
             // TODO: Update front-end to display specific error.
             this.error = true;
