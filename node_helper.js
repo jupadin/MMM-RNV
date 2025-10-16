@@ -13,9 +13,6 @@ const { HttpLink } = require('apollo-link-http');
 const { setContext } = require('apollo-link-context');
 
 const gql = require('graphql-tag');
-const fetch = require('node-fetch');
-
-const request = require('request');
 
 const Log = require('../../js/logger.js')
 
@@ -43,6 +40,7 @@ module.exports = NodeHelper.create({
                 // Create apiKey from given credentials
                 this.config.apiKey = await this.createToken(oAuthURL, clientID, clientSecret, resourceID);
             }
+
             // Authenticate by OAuth
             this.client = this.authenticate(this.config.apiKey);
         }
@@ -56,23 +54,33 @@ module.exports = NodeHelper.create({
 
 
     getColor: function() {
+        Log.info(`${this.name}: Fetching color from RNV-Server...`);
+
         const self = this;
-        Log.info(this.name + ": Fetching color from RNV-Server...");
         const colorUrl = "https://rnvopendataportalpublic.blob.core.windows.net/public/openDataPortal/liniengruppen-farben.json";
-        request(colorUrl, (error, response, body) => {
-            if (error || response.statusCode !== 200) {
-                Log.debug(self.name + ": Could not fetch color data from RNV-Server (" + response.statusCode + ").");
-                Log.debug(self.name + ": Retring to fetch color data in 30s.");
-                self.colorTimer = setTimeout(self.getColor.bind(self), 30 * 1000);
-                return;
+
+        fetch(colorUrl, {})
+        .then(response => {
+            if (response.status != 200) {
+                Log.debug(`${this.name}: Could not fetch color data from RNV-Server (${response.status}).`);
+                Log.debug(`${this.name}: Retring to fetch color data in 30s.`);
+                throw `Could not fetch color data from RNV-Server with status code ${response.status}.`
             }
-            const result = JSON.parse(body).lineGroups;
-            self.sendSocketNotification("COLOR", result);
-        });
+            return response.json();
+        })
+        .then(data => {
+            self.colorTimer = setTimeout(self.getColor.bind(self), 30 * 1000);
+            self.sendSocketNotification("COLOR", data.lineGroups);
+            return;
+        })
+        .catch(error => {
+            Log.error(`${this.name}: ${error}.`);
+        })
     },
 
     getData: function() {
-        Log.info(this.name + ": Fetching data from RNV-Server...");
+        Log.info(`${this.name}: Fetching data from RNV-Server...`);
+
         const now = new Date().toISOString();
         const numJourneys = this.config.numJourneys;
         const stationID = this.config.stationID;
@@ -116,6 +124,7 @@ module.exports = NodeHelper.create({
                 }
             }
         }`;
+
         this.client.query({ query: gql(query) }).then(fetchedData => {
             // Remove elements where its depature time is equal to null
             // Iteration from end of array since the command *splice* might reduce its size.
