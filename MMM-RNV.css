@@ -59,3 +59,9 @@
 .MMM-RNV.data.platform {
     text-align: right;
 }
+
+.MMM-RNV .footer {
+    text-align: right;
+    font-size: small;
+    border-top: 1px solid var(--color-text-dimmed);
+}

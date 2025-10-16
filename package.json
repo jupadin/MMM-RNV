@@ -6,8 +6,13 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "license": "MIT",
+  "keywords": [
+    "MagicMirror",
+    "Public Transport",
+    "RNV"
+  ],
   "author": "jupadin",
+  "license": "MIT",
   "dependencies": {
     "apollo-cache-inmemory": "^1.6.6",
     "apollo-client": "^2.6.10",

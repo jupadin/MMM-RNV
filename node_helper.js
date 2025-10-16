@@ -69,7 +69,11 @@ module.exports = NodeHelper.create({
             return response.json();
         })
         .then(data => {
+<<<<<<< HEAD
             self.colorTimer = setTimeout(self.getColor.bind(self), 30 * 1000);
+=======
+            // self.colorTimer = setTimeout(self.getColor.bind(self), 30 * 1000);
+>>>>>>> 7c82875d5c1668eac401fcfe4971f5fcd3c9184a
             self.sendSocketNotification("COLOR", data.lineGroups);
             return;
         })
@@ -201,7 +205,7 @@ module.exports = NodeHelper.create({
                     this.getData();
                 });
             } else {
-                Log.debug(error);
+                Log.debug(`${this.name} : ${error}.`);
                 // Create error return value
                 const errValue = 1;
                 // And send socket notification back to front-end to display the / an error...
@@ -219,7 +223,7 @@ module.exports = NodeHelper.create({
         });
         
         if (!response.ok) {
-            Log.debug("Error while creating access token.", response.error);
+            Log.debug(`${this.name}: Error while creating access token:  ${response.error}`);
             return null;
         }
         const json = await response.json();
