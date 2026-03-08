@@ -262,8 +262,9 @@ class Fetcher {
 
             this.data = fetchedData;
             this.broadcastData()
+
         } catch (error) {
-            Log.info("THIS", error);
+            Log.error(error);
             const delay = this.getDelayForError(error);
             nextDelay = delay;
             this.fetchFailedCallback(this, error);
@@ -280,14 +281,14 @@ class Fetcher {
             const response = await fetch(url);
 
             if (response.status != 200) {
-                Log.error("ERROR")
                 throw new Error(`Could not fetch color data from RNV-Server with status code ${response.status}.`)
             }
+
             const data = await response.json();
             this.color = data.lineGroups;
 
         } catch(error) {
-            Log.error(`ABC: ${error}`);
+            Log.error(`${error}`);
         }
     }
 }
