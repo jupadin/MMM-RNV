@@ -5,58 +5,64 @@
  * MIT Licensed.
  */
 
+.MMM-RNV {
+    font-size: 16px;
+}
+
+.MMM-RNV .table {
+    line-height: 1.25;
+}
+
+.MMM-RNV .tableHeader {
+    text-align: center;
+}
+
 .MMM-RNV.header.line {
     text-align: center;
 }
 
-.MMM-RNV.header.direction {
+.MMM-RNV .direction {
     text-align: center;
 }
 
-.MMM-RNV.header.platform {
+.MMM-RNV .platform {
     text-align: right;
 }
 
-.MMM-RNV.header.delay {
+.MMM-RNV .delay {
     padding-left: 10px;
     text-align: left;
 }
 
-.MMM-RNV.data.departure {
+.MMM-RNV .departure {
     text-align: left;
 }
 
-.MMM-RNV.data.delay {
+.MMM-RNV .delay {
     padding-left: 10px;
     padding-right: 10px;
 }
 
-.MMM-RNV.data.line {
+/* .MMM-RNV .line {
     width: 20px;
     height: 20px;
     padding: 1px;
-}
+} */
 
-.MMM-RNV.data.line.content {
+.MMM-RNV .content {
     text-align: center;
-    font-size: 16px;
-    padding: 2px;
+    padding: 3px;
     color: #FFFFFF;
-    background-clip: padding-box;
+    /* background-clip: padding-box; */
 }
 
-.MMM-RNV.data.icon {
+.MMM-RNV .icon {
     text-align: center;
     padding-right: 10px;
     padding-left: 10px;
 }
 
-.MMM-RNV.data.direction {
-    width: 50%;
-    text-align: center;
-}
-
-.MMM-RNV.data.platform {
+.MMM-RNV .platform {
     text-align: right;
 }
 

@@ -11,8 +11,8 @@ Module.register("MMM-RNV",{
         header: "MMM-RNV",
         animationSpeed: 2 * 1000, // 2 seconds
         updateInterval: 1 * 60 * 1000, // every 1 minute
-        stationID: "2417",
-        numJourneys: "10",
+        stationID: 2417,
+        numJourneys: 10,
         coloredLines: true,
         showLineIcons: true,
         useColorForRealTimeInfo: true,
@@ -27,27 +27,32 @@ Module.register("MMM-RNV",{
         tenantID: "",
         clientAPIURL: "",
         icon: {
-            "STRASSENBAHN" : "fas fa-train",
-            "STADTBUS" : "fas fa-bus"
+            "STRASSENBAHN" : "fa fa-train",
+            "STADTBUS" : "fa fa-bus"
         },
     },
     
     // Define start sequence.
     start: function() {
-        Log.info("Starting module: " + this.name); 
+        Log.info(`Starting module: ${this.name}`);
+        // Indicate no data available yet
         this.loaded = false;
+
         this.error = null;
         this.credentials = false;
         this.stationName = "";
+        
+        // Clear data before start
         this.fetchedData = null;
         this.fetchedColor = null;
+        this.config.identifier = this.identifier;
 
         if ( (this.config.apiKey) || (this.config.clientID && this.config.clientSecret && this.config.tenantID && this.config.resourceID) ) {
             this.credentials = true;
             // Build oAuthURL based on given tenantID.
             this.config.oAuthURL = "https://login.microsoftonline.com/" + this.config.tenantID + "/oauth2/token";
-            this.sendSocketNotification("SET_CONFIG", this.config);
         }
+        this.sendSocketNotification("SET_CONFIG", this.config);
     },
     
     // Define required styles.
@@ -106,14 +111,13 @@ Module.register("MMM-RNV",{
 
         // Create dom table
         const table = document.createElement("table");
-        table.className = "MMM-RNV light small";
-        table.id = "RNVTable";
+        table.className = "table";
 
         if (this.config.showTableHeader) {
             const tableHead = document.createElement("tr");
 
             const tableHeadTime = document.createElement("th");
-            tableHeadTime.className = "MMM-RNV header departure";
+            tableHeadTime.className = "departure";
 
             if (this.config.showTableHeaderAsSymbols) {
                 const tableHeadTimeIcon = document.createElement("i");
@@ -127,31 +131,31 @@ Module.register("MMM-RNV",{
             }
 
             const tableHeadLine = document.createElement("th");
-            tableHeadLine.className = "MMM-RNV header line";
+            tableHeadLine.className = "line";
             tableHeadLine.colSpan = "2";
             if (this.config.showTableHeaderAsSymbols) {
                 const tableHeadLineIcon = document.createElement("i");
-                tableHeadLineIcon.className ="fas fa-tag";
+                tableHeadLineIcon.className ="fa fa-tag";
                 tableHeadLine.appendChild(tableHeadLineIcon);
             } else {
                 tableHeadLine.innerHTML = this.translate("LINE");
             }
             
             const tableHeadDestination = document.createElement("th");
-            tableHeadDestination.className = "MMM-RNV header direction";
+            tableHeadDestination.className = "direction";
             if (this.config.showTableHeaderAsSymbols) {
                 const tableHeadDestinationIcon = document.createElement("i");
-                tableHeadDestinationIcon.className = "fas fa-arrows-alt-h";
+                tableHeadDestinationIcon.className = "fa fa-arrows-alt-h";
                 tableHeadDestination.appendChild(tableHeadDestinationIcon);
             } else {
                 tableHeadDestination.innerHTML = this.translate("DIRECTION");
             }
             
             const tableHeadPlatform = document.createElement("th");
-            tableHeadPlatform.className = "MMM-RNV header platform";
+            tableHeadPlatform.className = "platform";
             if (this.config.showTableHeaderAsSymbols) {
                 const tableHeadPlatformIcon = document.createElement("i");
-                tableHeadPlatformIcon.className = "fas fa-question";
+                tableHeadPlatformIcon.className = "fa fa-question";
                 tableHeadPlatform.appendChild(tableHeadPlatformIcon);
             } else {
                 tableHeadPlatform.innerHTML = this.translate("PLATFORM");
@@ -195,12 +199,12 @@ Module.register("MMM-RNV",{
 
             // Time
             const dataCellTime = document.createElement("td");
-            dataCellTime.className = "MMM-RNV data departure";
+            dataCellTime.className = "departure";
             dataCellTime.innerHTML = plannedDeparture;
 
             // - Delay
             const dataCellTimeDelay = document.createElement("span");
-            dataCellTimeDelay.className = "MMM-RNV data delay";
+            dataCellTimeDelay.className = "delay";
             if (delay > 0) {
                 dataCellTimeDelay.innerHTML = "+ " + delay;
                 dataCellTimeDelay.classList.add("late");
@@ -224,10 +228,10 @@ Module.register("MMM-RNV",{
             
             // Line
             const dataCellLine = document.createElement("td");
-            dataCellLine.className = "MMM-RNV data line";
+            dataCellLine.className = "line";
 
             const dataCellLineContent = document.createElement("div");
-            dataCellLineContent.className = "MMM-RNV data line content";
+            dataCellLineContent.className = "content";
             dataCellLineContent.innerHTML = line;
 
             if (this.config.coloredLines) {
@@ -253,7 +257,7 @@ Module.register("MMM-RNV",{
             
             // Icon
             const dataCellLineSpan = document.createElement("td");
-            dataCellLineSpan.className = "MMM-RNV data icon";
+            dataCellLineSpan.className = "icon";
             if (this.config.showLineIcons) {
                 const dataCellLineIcon = document.createElement("i");
                 dataCellLineIcon.className = this.config.icon[type];
@@ -263,13 +267,13 @@ Module.register("MMM-RNV",{
 
             // Direction
             const dataCellDirection = document.createElement("td");
-            dataCellDirection.className = "MMM-RNV data direction";
+            dataCellDirection.className = "direction";
             dataCellDirection.innerHTML = destination;
             dataRow.appendChild(dataCellDirection);
 
             // Platform
             const dataCellPlatform = document.createElement("td");
-            dataCellPlatform.className = "MMM-RNV data platform";
+            dataCellPlatform.className = "platform";
             dataCellPlatform.innerHTML = platform;
             dataRow.appendChild(dataCellPlatform);
 
@@ -308,19 +312,27 @@ Module.register("MMM-RNV",{
     
     // Override socket notification handler.
     socketNotificationReceived: function(notification, payload) {
+        // If this message isn't for me...
+        // Since we could have the module deployed multiple times, I want to process only the message which is for me.
+        if (this.identifier !== payload.id) {
+            return;
+        }
+
+        // console.log(payload.id, notification, payload);
+
         if (notification === "DATA") {
             let animationSpeed = this.config.animationSpeed;
             if (this.loaded) {
                 animationSpeed = 0;
             }
-            this.fetchedData = payload;
+            this.fetchedData = payload.data;
             // Set station name of current fetch
-            this.stationName = payload.data.station.longName;
+            this.stationName = payload.data.data.station.longName;
             this.loaded = true;
             // Update dom with given animation speed.
             this.updateDom(animationSpeed);
         } else if (notification === "COLOR") {
-            this.fetchedColor = payload;
+            this.fetchedColor = payload.data;
             // // If there is already data available, update dom with fetched color data.
             // if (this.config.fetchedData != null) {
             //     // Use default animation speed to update dom with color data
