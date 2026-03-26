@@ -11,6 +11,40 @@ The module is based on the work of [yawnsde](https://github.com/yawnsde/MMM-RNV)
 The module monitors a given station in the RNV traffic network and shows by default the 10 upcoming departures with its destination, type and delay. It also shows additional information like the platform.
 Either a valid API key or credentials are required, which can be requested here for free: https://opendata.rnv-online.de/datahub-api
 
+![MMM-RNV](https://user-images.githubusercontent.com/86625839/202857101-f752da2e-3514-425d-a1b9-eeee01165637.png)
+
+
+## ✨ Features
+Displays upcoming departures for a selected RNV station
+Shows:
+- Line number and type
+- Destination
+- Delay / real-time information
+- Platform (if available)
+- Configurable number of departures (default: 10)
+- Optional icons and colored lines
+
+
+## 📡 Data Source & License
+
+This module uses data provided by Rhein-Neckar-Verkehr GmbH (RNV).
+The data is accessed via the RNV Data Hub API and is subject to the: “Datenlizenz Deutschland – Namensnennung – Version 2.0 (dl-de/by-2-0)”
+👉 This means:
+- You must provide proper attribution to RNV when using the data
+- You must comply with the terms of the data license
+
+⚠️ Important:
+This repository only contains the module code (licensed under MIT).
+It does not include any RNV data.
+
+Users of this module are responsible for complying with the RNV data license.
+
+More information and API access:
+https://opendata.rnv-online.de/datahub-api
+
+
+
+
 ## Installation
 
 Open a terminal session, navigate to your MagicMirror's `modules` folder and execute `git clone https://github.com/jupadin/MMM-RNV.git`, such that a new folder called MMM-RNV will be created.
