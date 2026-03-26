@@ -29,6 +29,7 @@ Shows:
 
 This module uses data provided by Rhein-Neckar-Verkehr GmbH (RNV).
 The data is accessed via the RNV Data Hub API and is subject to the: “Datenlizenz Deutschland – Namensnennung – Version 2.0 (dl-de/by-2-0)”
+
 👉 This means:
 - You must provide proper attribution to RNV when using the data
 - You must comply with the terms of the data license
