@@ -14,6 +14,8 @@ const { setContext } = require('apollo-link-context');
 
 const gql = require('graphql-tag');
 
+const moment = require('moment');
+
 const Log = require('logger');
 
 const FIFTEEN_MINUTES = 15 * 60 * 1000;
@@ -87,6 +89,8 @@ class Fetcher {
 	 */
 	getDelayForError (error) {
 		let delay = this.reloadInterval;
+        if (!error?.networkError?.statusCode) return delay;
+
         let status = error?.networkError?.statusCode ?? 0;
 
 		if (status === 401 || status === 403) {
@@ -131,13 +135,11 @@ class Fetcher {
      * Broadcasts the current data to listeners
      */
     broadcastData() {
-        let numJourneys = 0;
-        let numColors = 0;
-
+        let numJourneys;
         if (this.data?.data?.station?.journeys?.elements) numJourneys = this.data.data.station.journeys.elements.length;
-        if (this.color) numColors = this.color.length
+        else numJourneys = null;
 
-        Log.log(`Broadcasting ${numJourneys} journeys and ${numColors} color values from "${this.url}" to ${this.identifier}.`)
+        // Log.debug(`Broadcasting ${numJourneys} journeys to ${this.identifier}`);
         this.dataReceivedCallback(this);
     }
 
@@ -161,8 +163,11 @@ class Fetcher {
      * Fetches and processes data
      */
     async fetchData() {
-        Log.info(`Fetching data from RNV-Server for module ${this.identifier}...`);
+        Log.debug(`Fetching data from RNV-Server for ${this.identifier}...`);
         const now = new Date().toISOString();
+        const later = new Date();
+        later.setHours(new Date().getHours() + 10);
+        const then = later.toISOString();
         const numJourneys = this.numJourneys;
         const stationID = this.stationID;
 
@@ -170,12 +175,17 @@ class Fetcher {
             station(id:"${stationID}") {
                 hafasID
                 longName
-                journeys(startTime: "${now}" first: ${numJourneys}) {
+                journeys(startTime: "${now}" first: ${numJourneys} endTime: "${then}") {
                     totalCount
                     elements {
                         ... on Journey {
                             line {
                                 id
+                                style {
+                                    primary {
+                                        hex
+                                    }
+                                }
                             }
                             type
                             stops(onlyHafasID: "${stationID}") {
@@ -212,56 +222,13 @@ class Fetcher {
         try {
             const response = await this.client.query({ query: gql(query) });
             this.serverErrorCount = 0;
-            const fetchedData = response;
-
-            // Remove elements where its depature time is equal to null
-            // Iteration from end of array since the command *splice* might reduce its size.
-            for (let i = fetchedData.data.station.journeys.elements.length - 1; i >= 0; i--) {
-                if (fetchedData.data.station.journeys.elements[i].stops[0].plannedDeparture.isoString == null) {
-                    fetchedData.data.station.journeys.elements.splice(i, 1);
-                }
-            }
-
-            // Sorting fetched data based on the departure times
-            fetchedData.data.station.journeys.elements.sort((a, b) => {
-                let depA = a.stops[0].plannedDeparture.isoString;
-                let depB = b.stops[0].plannedDeparture.isoString;
-                return (depA < depB) ? -1 : ((depA > depB) ? 1 : 0);
-            });
-
-            const numDepartures = fetchedData.data.station.journeys.elements.length;
-            const delayFactor = 60 * 1000;
-
-            // Delay
-            for (let i = 0; i < numDepartures; i++) {
-                // Create new key-value pair, representing the current delay of the departure
-                fetchedData.data.station.journeys.elements[i].stops[0].delay = 0;
-                // If there is no realtime departure data avaialble, skip delay calculation and continue with next departure
-                if (fetchedData.data.station.journeys.elements[i].stops[0].realtimeDeparture.isoString == null) {
-                    continue;
-                }
-                
-                let currentDepartureTimes = fetchedData.data.station.journeys.elements[i].stops[0];
-                // Planned Departure
-                let plannedDepartureIsoString = currentDepartureTimes.plannedDeparture.isoString;
-                let plannedDepartureDate = new Date(plannedDepartureIsoString);
-                // Realtime Departure
-                let realtimeDepartureIsoString = currentDepartureTimes.realtimeDeparture.isoString;
-                let realtimeDepartureDate = new Date(realtimeDepartureIsoString);
-                // Delay calculation
-                let delayms = Math.abs(plannedDepartureDate - realtimeDepartureDate);
-                let delay = Math.floor(delayms / delayFactor);
-
-                // Assign calculated delay to new introduced key-value pair
-                fetchedData.data.station.journeys.elements[i].stops[0].delay = delay;
-            }
+            this.data = response;
 
             // Set flag to check whether a previous fetch was successful
             this.previousFetchOk = true;
             this.lastFetch = Date.now();
 
-            this.data = fetchedData;
-            this.broadcastData()
+            this.broadcastData();
 
         } catch (error) {
             Log.error(error);
@@ -272,25 +239,25 @@ class Fetcher {
         this.scheduleNextFetch(nextDelay);
     }
 
-    async fetchColor() {
-        Log.info(`Fetching color from RNV-Server for module ${this.identifier}...`);
+    // async fetchColor() {
+    //     Log.debug(`Fetching color from RNV-Server for module ${this.identifier}...`);
 
-        const url = "https://rnvopendataportalpublic.blob.core.windows.net/public/openDataPortal/liniengruppen-farben.json";
+    //     const url = "https://rnvopendataportalpublic.blob.core.windows.net/public/openDataPortal/liniengruppen-farben.json";
 
-        try {
-            const response = await fetch(url);
+    //     try {
+    //         const response = await fetch(url);
 
-            if (response.status != 200) {
-                throw new Error(`Could not fetch color data from RNV-Server with status code ${response.status}.`)
-            }
+    //         if (response.status != 200) {
+    //             throw new Error(`Could not fetch color data from RNV-Server with status code ${response.status}.`)
+    //         }
 
-            const data = await response.json();
-            this.color = data.lineGroups;
+    //         const data = await response.json();
+    //         this.color = data.lineGroups;
 
-        } catch(error) {
-            Log.error(`${error}`);
-        }
-    }
+    //     } catch(error) {
+    //         Log.error(`${error}`);
+    //     }
+    // }
 }
 
 
@@ -298,9 +265,9 @@ module.exports = NodeHelper.create({
     start: function() {
         this.config = null;
         this.client = null;
-        this.previousFetchOk = false;
-        this.colorTimer = null;
-        this.dataTimer = null;
+        // this.previousFetchOk = false;
+        // this.colorTimer = null;
+        // this.dataTimer = null;
 
         this.fetchers = [];
     },
@@ -308,6 +275,7 @@ module.exports = NodeHelper.create({
     socketNotificationReceived: async function(notification, payload) {
         if (notification == "SET_CONFIG") {
             let apiKey;
+            moment.updateLocale(config.language, payload.timeFormat);
             const clientAPIURL = payload.clientAPIURL;
 
             if (!payload.apiKey) {
@@ -327,6 +295,16 @@ module.exports = NodeHelper.create({
         }
     },
 
+    /**
+     * 
+     * @param {*} client 
+     * @param {*} url 
+     * @param {*} identifier 
+     * @param {*} fetchInterval 
+     * @param {*} numJourneys 
+     * @param {*} stationID 
+     * @returns 
+     */
     getOrCreateFetcher: function(client, url, identifier, fetchInterval, numJourneys, stationID) {
         try {
             new URL(url);
@@ -344,34 +322,36 @@ module.exports = NodeHelper.create({
                 Log.warn(`fetchInterval for url ${url} must be >= 60.000`)
                 fetchIntervalCorrected = 60000;
             }
-            Log.log(`Create new fetcher for url "${url}" and "${identifier}" - Interval: ${fetchIntervalCorrected || fetchInterval}`);
+            Log.debug(`Create new fetcher for url "${url}" and "${identifier}" - Interval: ${fetchIntervalCorrected || fetchInterval}`);
             fetcher = new Fetcher(client, url, fetchIntervalCorrected || fetchInterval, numJourneys, stationID, identifier);
 
             // Log.log(`Setting callback function of fetcher ${fetcher.identifier} for *onReceive*.`)
             fetcher.onReceive((fetcher) => {
+                // Call the local *broadcastData* method of this module
                 this.broadcastData(fetcher, identifier);
             })
 
             // Log.log(`Setting callback function of fetcher ${fetcher.identifier} for *onError*.`)
             fetcher.onError((fetcher, error) => {
-                Log.error(`Fetcher error - Could not fetch data for module ${fetcher.identifier}: ${error}`)
+                Log.error(`Fetcher error - Could provide data for module ${fetcher.identifier}: ${error}`)
                 //let errorType = NodeHelper.checkFetchError(error);
-                this.sendSocketNotification("ERROR", 4);
+                this.sendSocketNotification("ERROR", {id: identifier, data: 4});
             })
 
             this.fetchers[identifier + url] = fetcher;
             fetcher.fetchData();
-            fetcher.fetchColor();
+            //fetcher.fetchColor();
         } else {
-            Log.log(`Use existing fetcher for url ${url} and identifier ${identifier}`)
+            Log.debug(`Use existing fetcher for url ${url} and identifier ${identifier}`)
             fetcher = this.fetchers[identifier + url];
 
             // Check if data is stale and needs refresh
             if (fetcher.shouldRefetch()) {
-                Log.log(`Data is stale, fetching fresh data for url ${url}`)
+                Log.debug(`Data is stale, fetching fresh data for url ${url}`)
                 fetcher.fetchData();
             } else {
-                fetcher.broadcastData();
+                // Calling the onRecieveCallbackMethod of the fetcher object
+                fetcher.broadcastData(this, identifier);
             }
         }
     },
@@ -416,7 +396,118 @@ module.exports = NodeHelper.create({
      * Broadcasts the current data to listeners
      */
     broadcastData(fetcher, identifier) {
-        if (fetcher.data) this.sendSocketNotification("DATA", {id: identifier, data: fetcher.data});
-        if (fetcher.color) this.sendSocketNotification("COLOR", {id: identifier, data: fetcher.color});
-    }
+        let d = [];
+        if (fetcher.data) d = this.transformData(fetcher.data.data.station.journeys.elements);
+
+        const response = {
+            id: identifier,
+            data: d,
+            stationName: fetcher.data.data.station.longName,
+            stationID: fetcher.data.data.station.hafasID,
+            lastFetch: fetcher.lastFetch,
+        }
+
+        if (fetcher.data) this.sendSocketNotification("DATA", response);
+        // if (fetcher.color) this.sendSocketNotification("COLOR", {id: identifier, data: fetcher.color});
+    },
+
+    transformData(data) {
+        let elements = data || [];
+
+
+        // Neue Kopie für Darstellung
+        const transformedJourneys = elements
+        .filter(j => j.stops?.[0]?.plannedDeparture?.isoString)
+        .map(j => {
+            const stop = j.stops[0];
+
+            // Planned Departure
+            const planned = moment.utc(stop.plannedDeparture.isoString).local();
+
+            // Realtime Departure
+            const realtime = stop.realtimeDeparture?.isoString
+                ? moment.utc(stop.realtimeDeparture.isoString).local()
+                : null;
+
+            // Delay in minutes
+            const delay = realtime ? realtime.diff(planned, "minutes") : 0;
+
+            return {
+                line: j.line.id.split('-')[1],
+                line_color: j.line.style.primary.hex,
+                depature: planned.format("HH:mm"),
+                direction: stop.destinationLabel,
+                delay: delay,
+                platform: stop.pole.platform.label,
+                type: j.type
+            };
+        });
+
+        return transformedJourneys;
+
+
+        // // Remove elements where its depature time is equal to null
+        // // Iteration from end of array since the command *splice* might reduce its size.
+        // for (let i = elements.length - 1; i >= 0; i--) {
+        //     if (elements[i].stops[0].plannedDeparture.isoString == null) {
+        //         elements.splice(i, 1);
+        //     }
+        // }
+
+        // // Sorting fetched data based on the departure times
+        // elements.sort((a, b) => {
+        //     let depA = a.stops[0].plannedDeparture.isoString;
+        //     let depB = b.stops[0].plannedDeparture.isoString;
+        //     return (depA < depB) ? -1 : ((depA > depB) ? 1 : 0);
+        // });
+
+        // const numDepartures = elements.length;
+        // const delayFactor = 60 * 1000;
+
+        // // Delay
+        // for (let i = 0; i < numDepartures; i++) {
+        //     // Create new key-value pair, representing the current delay of the departure
+        //     elements[i].stops[0].delay = 0;
+        //     // If there is no realtime departure data avaialble, skip delay calculation and continue with next departure
+        //     if (elements[i].stops[0].realtimeDeparture.isoString == null) {
+        //         continue;
+        //     }
+            
+        //     let currentDepartureTimes = elements[i].stops[0];
+        //     // Planned Departure
+        //     let plannedDepartureIsoString = currentDepartureTimes.plannedDeparture.isoString;
+        //     let plannedDepartureDate = new Date(plannedDepartureIsoString);
+        //     // Realtime Departure
+        //     let realtimeDepartureIsoString = currentDepartureTimes.realtimeDeparture.isoString;
+        //     let realtimeDepartureDate = new Date(realtimeDepartureIsoString);
+        //     // Delay calculation
+        //     let delayms = Math.abs(plannedDepartureDate - realtimeDepartureDate);
+        //     let delay = Math.floor(delayms / delayFactor);
+
+        //     // Assign calculated delay to new introduced key-value pair
+        //     elements[i].stops[0].delay = delay;
+        // }
+
+        // // const { journeys } = fetchedData.data.station;
+        // // journeys.elements = journeys.elements.map(j => this.mapDepartures(j));
+
+        // return elements;
+    },
+
+    mapDepartures(departures) {
+        let transformedDepartures = {
+            line: departures.line.id.split('-')[1],
+            type: departures.type,
+            destination: departures.stops[0].destinationLabel,
+            platform: departures.stops[0].pole.platform.label,
+            delay: departures.stops[0].delay,
+            // TODO: Fix TimeZone-Part
+            // plannedDeparture: new Date(departures.stops[0].plannedDeparture.isoString).toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit', hour12: false}),
+
+            depature: moment().utc(departures.stops[0].plannedDeparture.isoString).local().format("HH:mm"),
+            direction: departures.stops[0].destinationLabel
+        }
+
+        return transformedDepartures;
+    },
 });
