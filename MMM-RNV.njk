@@ -1,0 +1,88 @@
+{% if loading %}
+    <div class="light small dimmed">{{ loading }}</div>
+{% elif error %}
+    <div class="light small dimmed">{{ error }}</div>
+{% elif journeys | length == 0 %}
+    <div class="light small dimmed">{{ noData }}</div>
+{% else %}
+    <table class="table">
+        {% if displayHeaderAsIcons %}
+            <tr>
+                <th class="header departure" style="text-align:center;">
+                    <i class="far fa-clock"></i>
+                </th>
+                <th class="header line" colspan="2">
+                    <i class="fa fa-tag"></i>
+                </th>
+                <th class="header direction">
+                    <i class="fa fa-arrows-alt-h"></i>
+                </th>
+                <th class="header platform">
+                    <i class="fa fa-question"></i>
+                </th>
+            </tr>
+            <tr>
+                <td colspan="5"><hr></td>
+            </tr>
+        {% elif displayHeader %}
+            <tr>
+                <th class="header departure">Departure</th>
+                <th class="header line" colspan="2">Line</th>
+                <th class="header direction">Direction</th>
+                <th class="header platform">Platform</th>
+            </tr>
+            <tr>
+                <td colspan="5"><hr></td>
+            </tr>
+        {% endif %}
+
+        {% for journey in journeys %}
+            {% set delayClass = "" %}
+            {% set delayText = "" %}
+
+            {% if journey.delay > 0 %}
+                {% set delayClass = "late" %}
+                {% set delayText = "+ " ~ journey.delay %}
+            {% elif journey.delay < 0 %}
+                {% set delayClass = "early" %}
+                {% set delayText = "- " ~ (-1 * journey.delay) %}
+            {% else %}
+                {% set delayClass = "on-time" %}
+                {% set delayText = "+0" %}
+            {% endif %}
+
+            <tr>
+                <td class="departure">
+                    {{ journey.depature }}
+                    <span class="delay {{ delayClass }}"
+                          {% if delayClass == "on-time" %}style="visibility:hidden"{% endif %}>
+                        {{ delayText }}
+                    </span>
+                </td>
+                <td class="line">
+                    <div class="content line-badge" style="background-color: {{ journey.line_color | default('grey') }};">
+                        {{ journey.line }}
+                    </div>
+                </td>
+                <td class="icon">
+                    {% if icons[journey.type] %}
+                        <i class="{{ icons[journey.type] }}"></i>
+                    {% endif %}
+                </td>
+                <td class="direction">{{ journey.direction }}</td>
+                <td class="platform">{{ journey.platform }}</td>
+            </tr>
+        {% endfor %}
+
+        {% if showFooter %}
+            <tr class="footerRow">
+                <td colspan="5" class="footer">
+                    <span class="status-dot  {{ updateClass }}"></span>
+                    Zuletzt aktualisiert vor {{ minutesAgo }} Minute{% if minutesAgo != 1 %}n{% endif %}
+                    (um {{ last_updated }})
+                    {# Zuletzt aktualisiert um {{ last_updated }} #}
+                </td>
+            </tr>
+        {% endif %}
+    </table>
+{% endif %}

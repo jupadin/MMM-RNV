@@ -29,11 +29,6 @@
     text-align: right;
 }
 
-.MMM-RNV .delay {
-    padding-left: 10px;
-    text-align: left;
-}
-
 .MMM-RNV .departure {
     text-align: left;
 }
@@ -41,6 +36,7 @@
 .MMM-RNV .delay {
     padding-left: 10px;
     padding-right: 10px;
+    text-align: left;
 }
 
 /* .MMM-RNV .line {
@@ -71,3 +67,29 @@
     font-size: small;
     border-top: 1px solid var(--color-text-dimmed);
 }
+
+.MMM-RNV .delay.late {
+    color: #FF0000;
+}
+
+.MMM-RNV .delay.early {
+    color: #00FF00;
+}
+
+.MMM-RNV td {
+    padding: 0 6px;
+}
+
+.MMM-RNV .status-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-right: 6px;
+    border-radius: 50%;
+    transition: background-color 0.6s ease;
+}
+
+/* Punktfarben */
+.MMM-RNV .footer .status-dot.fresh { background-color: green; }
+.MMM-RNV .footer .status-dot.aging { background-color: #FFA500; }
+.MMM-RNV .footer .status-dot.stale { background-color: #FF4444; }
